@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local experiment output (if it ever lands here by accident — runs should
+# happen in opencarp_tutorials/ where they write through to the install)
+*.dat
+*.bin
+*.igb
+*.sv
+Trace_*.dat
+BENCH_REG.txt

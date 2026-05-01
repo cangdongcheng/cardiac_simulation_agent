@@ -26,4 +26,4 @@ See `../CLAUDE.md` § "Workflow note structure" for the required layout.
 - `lhs-pom.md` — parameter ranges → Latin Hypercube samples → distribution of model outputs
 - `cellml-import.md` — `.cellml` model → EasyML → compiled `.so` → bench run
 
-Each new workflow should be derived from a tutorial we've actually run, with the relevant `opencarp_tutorials/.../CLAUDE.md` linked as the raw record.
+Each new workflow should be derived from a tutorial we've actually run, with the relevant `tools/ep_simulation/openCARP/tutorials/<section>/<tutorial>.md` linked as the raw record.

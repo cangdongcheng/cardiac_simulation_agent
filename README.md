@@ -4,7 +4,8 @@ A validated knowledge library for cardiac simulation, structured for an agent to
 
 - **Rules / contributor guide** → `CLAUDE.md`
 - **Agent navigation map** → `INDEX.md`
-- **Working tutorial tree** → `opencarp_tutorials/` (write-through symlink to the openCARP install)
+
+The library is **decoupled from the openCARP install**. Tutorial-derived notes live under `tools/ep_simulation/openCARP/tutorials/` as copies of the originals; for running tutorials in place, use the install at `/usr/local/lib/opencarp/share/tutorials/` (or via the `~/tutorials` symlink).
 
 ## Layout
 
@@ -17,12 +18,11 @@ cardiac_simulation_agent/
 ├── workflows/               ← goal-oriented: tool-chains with stated endpoints
 ├── tools/                   ← tool-oriented: per-tool usage, by category
 │   ├── ep_simulation/       (openCARP, bench, carputils)
+│   │   └── openCARP/tutorials/   ← per-tutorial notes (copies)
 │   ├── mesh_processing/     (meshtool, cobiveco, ...)
 │   ├── visualization/       (meshalyzer, ...)
 │   └── em_coupling/         (placeholder)
 │
-├── opencarp_tutorials → /usr/local/lib/opencarp/share/tutorials
-│                            ← write-through symlink to the install
 └── refs/                    ← shared bibliography
 ```
 
@@ -42,6 +42,7 @@ Concepts, findings, and bugs aren't separate categories — they're sections ins
 | openCARP, bench, meshtool | `/usr/local/bin/` |
 | meshalyzer | `/usr/local/meshalyzer/` (patched, see `tools/visualization/meshalyzer/haswell-fix.md`) |
 | carputils Python | `/home/cdc/miniconda3/envs/opencarp/bin/python` |
-| Tutorial source tree | `opencarp_tutorials/` (write-through to install) |
+| Tutorial install (run in place) | `/usr/local/lib/opencarp/share/tutorials/` (or `~/tutorials`) |
+| Tutorial-derived notes (curated) | `tools/ep_simulation/openCARP/tutorials/` |
 
 The `opencarp` conda env must be on `PATH` for `tuneCV`, `restituteCV`, `cellml_converter.py`, `limpet_fe.py`, `make_dynamic_model.sh` to resolve.

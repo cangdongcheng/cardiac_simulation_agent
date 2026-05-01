@@ -23,8 +23,11 @@ cardiac_simulation_agent/
 │   ├── visualization/         (meshalyzer, ...)
 │   └── em_coupling/           (placeholder — FEniCS-pulse, CARPentry-Pro)
 │
-├── opencarp_tutorials/  ← write-through symlink to /usr/local/lib/opencarp/share/tutorials
 └── refs/                ← shared bibliography
+
+The library is decoupled from the openCARP install. Tutorial-derived notes are
+copies under `tools/ep_simulation/openCARP/tutorials/`. The install at
+`/usr/local/lib/opencarp/share/tutorials/` is the place to run tutorials.
 ```
 
 ## Two kinds of notes
@@ -49,9 +52,9 @@ Concepts, findings, and bugs are **not** separate categories — they live insid
 
 - Reference material that exists elsewhere and is well-maintained — link, don't rewrite (e.g. openCARP's `--help` output)
 - Speculation / aspirational content — if not tested, don't claim
-- Verbatim copies of `opencarp_tutorials/.../CLAUDE.md` files — those are the raw record; we digest, not duplicate
+- Verbatim re-snapshots of install-tree `CLAUDE.md` files — `tools/ep_simulation/openCARP/tutorials/` already holds a one-time snapshot; future contributions should be cross-tutorial syntheses or fresh runs, not re-copies
 - One-off conversation notes — useful in one chat ≠ reusable
-- Code/scripts — the library is documentation; runnable code lives in `opencarp_tutorials/` (write-through) or future tool-specific workspaces
+- Code/scripts — the library is documentation; runnable code lives in the openCARP install (`/usr/local/lib/opencarp/share/tutorials/`) or future tool-specific workspaces
 - Tutorials for humans — this is a reference, not a textbook
 
 ## Validation status (frontmatter)

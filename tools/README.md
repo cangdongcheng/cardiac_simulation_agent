@@ -1,21 +1,18 @@
 # tools/
 
-The **WITH WHAT**: per-tool reference notes. How to install, invoke, and reason about each piece of software in the cardiac simulation pipeline.
+**Tool-oriented** notes: per-tool usage references, organized by category.
 
-A note belongs here if it answers "what flags does this tool accept", "what does its output look like", "how does it relate to other tools".
+Each tool note answers: how to invoke, key flags, output formats, common modes, known bugs, when to use vs alternatives. See `../CLAUDE.md` § "Tool note structure" for the required layout.
 
-## Current notes
+## Categories
 
-(none yet — add as questions arise)
+| Subdir | Purpose |
+| --- | --- |
+| `ep_simulation/` | Solvers for cellular and tissue electrophysiology — openCARP, bench, carputils |
+| `mesh_processing/` | Geometry preparation, meshing, fiber assignment — meshtool, cobiveco |
+| `visualization/` | Trace and field visualizers — meshalyzer, limpetGUI, paraview |
+| `em_coupling/` | Tools that solve mechanics or couple EP↔mechanics — placeholder; populated when FEniCS-pulse / CARPentry-Pro / Abaqus enter the pipeline |
 
-## Likely additions
+## Folder vs file
 
-- `opencarp.md` — invocation patterns, .par files, monodomain vs bidomain, parameter dictionary lookup with `carphelp`
-- `bench.md` — single-cell solver, output formats, `--bin` vs ASCII, all the experiment types (pacing, restitution, voltage clamp, EM)
-- `carputils.md` — Python wrapper, `@tools.carpexample`, parser conventions, common pitfalls
-- `meshtool.md` — mesh manipulation, format conversion, fiber assignment
-- `meshalyzer.md` — visualization, .mshz views, vertex picking, links to `troubleshooting/meshalyzer-haswell.md`
-- `limpetGUI.md` — single-cell trace visualization
-- `ecosystem.md` — FEniCS-pulse, Chaste, Cardioid, CARPentry-Pro (NumeriCor), Abaqus + Living Heart, Continuity. Comparison table.
-
-Each per-tool note should at minimum cover: install location, key flags, output formats, common gotchas, links to relevant `concepts/`, `workflows/`, and `troubleshooting/` notes.
+A tool gets its own folder when it has multiple distinct usage modes (openCARP) or substantial extensions/bugs that warrant their own files (meshalyzer + Haswell fix). Otherwise a single `<toolname>.md` at the category level. See `../CLAUDE.md` § "When a tool gets a folder vs a file".

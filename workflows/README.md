@@ -1,35 +1,29 @@
 # workflows/
 
-The **HOW**: end-to-end recipes. Each note is a runnable workflow with concrete commands, expected outputs, and common variations.
+**Goal-oriented** notes: tool-chains with explicit endpoints. Each note answers "how do I go from X to Y?"
 
-A note belongs here if it would let an agent (or a colleague) reproduce a full simulation from a clean state — not a fragment of a workflow.
+A workflow note must state at the top:
+- **Input** — what you start with
+- **Output** — what you end up with
+- **Tools** — the chain, in order
 
-## Structure for a workflow note
-
-```
-1. Goal (one paragraph)
-2. Prerequisites (env, mesh, ionic model, license, ...)
-3. Commands (literal, copy-pasteable)
-4. Expected outputs (file names, sizes, shapes)
-5. Sanity checks (numerical values to confirm the run was correct)
-6. Variations (common knobs to twist, with what they do)
-7. Links (concepts that explain it, troubleshooting that catches its bugs)
-```
+See `../CLAUDE.md` § "Workflow note structure" for the required layout.
 
 ## Current notes
 
-(none yet — add as workflows are exercised end-to-end)
+| File | Status | Pipeline |
+| --- | --- | --- |
+| `em-coupling.md` | mixed | Vm trace → Ca dynamics → active tension → tissue deformation. Math + tool landscape. |
 
-## Likely additions
+## Likely additions (write when a workflow is actually exercised end-to-end)
 
-- `single-cell-pacing.md` — bench pacing → limit cycle → reuse `.sv`. Cookbook from 01_basic_bench.
-- `tissue-conduction.md` — generate slab mesh → tune conductivities → measure CV. Cookbook from 03A_study_prep_tuneCV.
-- `apd-restitution.md` — bench `--restitute` workflow + slope analysis. Cookbook from 02B_APD_restitution.
-- `parameter-sweep.md` — polling-file workflow. Cookbook from 02_EP_tissue/20_parameter_sweep.
-- `reentry-induction.md` — S1-S2-S3 protocols (PEERP, RP_E, RP_B, PSD). Cookbook from 02_EP_tissue/21_reentry_induction.
-- `em-coupling-prescribed.md` — prescribed λ(t) trace for EM-without-mechanics-solver studies. Cookbook from 06_EM_coupling.
-- `em-coupling-fenics.md` — staggered openCARP + FEniCS-pulse. Cookbook to be developed when we go there.
-- `lhs-pom.md` — Latin Hypercube Sampling Population of Models. Cookbook from 12_parallel_single_cell.
-- `cellml-import.md` — CellML → EasyML → .so. Cookbook from 10_fromCellML.
+- `mesh-to-simulation.md` — raw geometry → fiber-tagged mesh → AP propagation traces
+- `single-cell-pacing.md` — ionic model + BCL → limit-cycle `.sv` → reusable initial state
+- `apd-restitution.md` — initial state → S1S2 / Dynamic protocol → APD-vs-DI curve + slope
+- `tissue-conduction-tuning.md` — slab mesh + target CV → tuned conductivities (gi, ge)
+- `parameter-sweep.md` — parameter ranges → polling file → population of model outputs
+- `reentry-induction.md` — baseline tissue → S1-S2-S3 protocol → induced reentry
+- `lhs-pom.md` — parameter ranges → Latin Hypercube samples → distribution of model outputs
+- `cellml-import.md` — `.cellml` model → EasyML → compiled `.so` → bench run
 
-Workflows should reference `findings/` for example numbers from past runs, and `troubleshooting/` for known pitfalls.
+Each new workflow should be derived from a tutorial we've actually run, with the relevant `opencarp_tutorials/.../CLAUDE.md` linked as the raw record.

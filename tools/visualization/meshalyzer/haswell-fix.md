@@ -1,13 +1,13 @@
 ---
-title: Meshalyzer vertex picking fixes for Intel Haswell / older Mesa / WSL
-status: validated   # Haswell binary patch + WSL source fix both confirmed working
-use_when: meshalyzer fails to compile shaders, prints `ERROR::SHADER::VERTEX::COMPILATION_FAILED`, or vertex picking does not select nodes — Intel Haswell or WSL
+title: Meshalyzer vertex picking fixes for Intel Haswell / older Mesa / WSL / Windows (Cygwin)
+status: validated   # Haswell binary patch + WSL source fix + Windows Cygwin binary patch all confirmed working
+use_when: meshalyzer fails to compile shaders, prints `ERROR::SHADER::VERTEX::COMPILATION_FAILED`, or vertex picking does not select nodes — Intel Haswell, WSL, or Windows
 last_updated: 2026-05-02
 ---
 
-# Meshalyzer vertex picking fixes for Intel Haswell / older Mesa / WSL
+# Meshalyzer vertex picking fixes for Intel Haswell / older Mesa / WSL / Windows (Cygwin)
 
-Documents the patches applied on `cdc-ThinkPad-X240` (Ubuntu 24.04, Intel HD Graphics 4400) and on WSL2 (llvmpipe software renderer) to fix vertex picking.
+Documents the patches applied on `cdc-ThinkPad-X240` (Ubuntu 24.04, Intel HD Graphics 4400), on WSL2 (llvmpipe software renderer), and on the Windows Cygwin build to fix vertex picking.
 
 ## Symptoms
 
@@ -49,7 +49,7 @@ The shaders are GLSL string literals baked into the meshalyzer binary. Patch the
 
 Trade-off from patches 3 + 4: the picking shader no longer respects user-defined clip planes. For normal use you'll never notice; only edge case is "click a vertex that's currently clipped away" — picking might select a vertex you can't see.
 
-## Step-by-step (works on any Linux x86_64 with the v6.1 AppImage)
+## Linux binary patch (works on any Linux x86_64 with the v6.1 AppImage)
 
 ### 1. Install meshalyzer
 
@@ -149,6 +149,81 @@ cd ~/tutorials/02_EP_tissue/00_simple
 
 - No `ERROR::SHADER::*` lines should appear in the terminal.
 - Clicking on the mesh should select individual vertices.
+
+## Windows Cygwin binary patch (validated 2026-05-02)
+
+The same binary-patching approach works on the Windows Cygwin build of meshalyzer. The GLSL strings are embedded identically. The FBO fix (Bug C) is **not** needed on native Windows — `glReadPixels(GL_BACK)` works correctly with a real GPU driver.
+
+Binary location: `~/SSD/meshalyzer/meshalyzer.exe`
+
+```bash
+cp ~/SSD/meshalyzer/meshalyzer.exe ~/SSD/meshalyzer/meshalyzer.exe.bak
+
+python3 - <<'PY'
+target = '/home/cangdongcheng/SSD/meshalyzer/meshalyzer.exe'
+out    = '/home/cangdongcheng/SSD/meshalyzer/meshalyzer.exe'
+data   = bytearray(open(target, 'rb').read())
+
+# Patch 1: downgrade GLSL 4.10 -> 4.00 in all shaders
+old, new = b'#version 410 core', b'#version 400 core'
+n = 0
+i = 0
+while True:
+    p = data.find(old, i)
+    if p == -1: break
+    data[p:p+len(old)] = new
+    n += 1
+    i = p + 1
+print(f'#version 410 -> 400: {n} replacements')
+
+# Patch 2: remove unsupported clip_cull_distance extension
+old = b'#extension GL_EXT_clip_cull_distance : enable\n'
+new = b' ' * len(old)
+p = data.find(old)
+if p != -1:
+    data[p:p+len(old)] = new
+    print(f'Removed clip_cull_distance extension at offset {p}')
+
+# Patch 3: blank out the no-qualifier gl_ClipDistance redeclaration
+old = b'float gl_ClipDistance[6];\n'
+new = b' ' * len(old)
+i = 0
+while True:
+    p = data.find(old, i)
+    if p == -1: break
+    if data[max(0, p-4):p] != b'out ':
+        data[p:p+len(old)] = new
+        print(f'Wiped no-out gl_ClipDistance redeclaration at {p}')
+    i = p + 1
+
+# Patch 4: blank out the for-loop using gl_ClipDistance[i]
+old = b'  for( int i=0; i<6; i++ )\n    gl_ClipDistance[i] = dot(vec4(aPos,1.0), clipEqn[i]);\n'
+new = b' ' * len(old)
+p = data.find(old)
+if p != -1:
+    data[p:p+len(old)] = new
+    print(f'Wiped picking for-loop at {p}')
+
+open(out, 'wb').write(data)
+print('Wrote', out)
+PY
+```
+
+Expected output:
+```
+#version 410 -> 400: 12 replacements
+Removed clip_cull_distance extension at offset 2301354
+Wiped no-out gl_ClipDistance redeclaration at 2301476
+Wiped picking for-loop at 2301782
+```
+
+(12 version replacements vs 11 on Linux — the Cygwin build has one additional shader string. Offsets will differ by build.)
+
+### Reverting (Windows)
+
+```bash
+cp ~/SSD/meshalyzer/meshalyzer.exe.bak ~/SSD/meshalyzer/meshalyzer.exe
+```
 
 ## WSL source-build fix (validated 2026-05-02)
 

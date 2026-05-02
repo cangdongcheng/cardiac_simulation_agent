@@ -6,7 +6,7 @@ Tools for visualizing cardiac simulation outputs: trace plots, mesh fields, and 
 
 | File | Status | Tool |
 | --- | --- | --- |
-| `meshalyzer/haswell-fix.md` | validated | Patch for meshalyzer shader compilation + vertex picking on Intel Haswell / WSL |
+| `meshalyzer/vertex-picking-fixes.md` | validated | Meshalyzer shader compilation + vertex picking fixes for Intel Haswell / WSL / Windows Cygwin |
 
 ## Likely additions
 
@@ -15,4 +15,4 @@ Tools for visualizing cardiac simulation outputs: trace plots, mesh fields, and 
 - `paraview.md` — when meshalyzer isn't enough (e.g. publication-quality figures, custom colormaps, animations beyond `.mshz`).
 - `python-plotting.md` — if we develop a recipe for plotting `.igb` / `.bin` outputs in matplotlib.
 
-Tool-specific bug fixes (like `meshalyzer/haswell-fix.md`) live alongside the tool's README in its folder.
+Tool-specific bug fixes (like `meshalyzer/vertex-picking-fixes.md`) live alongside the tool's README in its folder.

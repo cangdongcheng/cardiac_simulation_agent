@@ -28,7 +28,7 @@ Concepts, findings, and bugs are NOT separate categories — they live as sectio
 | Path | Status | Use when |
 | --- | --- | --- |
 | `workflows/em-coupling.md` | mixed | Question about Vm → Ca → tension → deformation; choosing an EM tool |
-| `tools/visualization/meshalyzer/haswell-fix.md` | validated | Meshalyzer shader errors or broken vertex picking on Intel Haswell / WSL |
+| `tools/visualization/meshalyzer/vertex-picking-fixes.md` | validated | Meshalyzer shader errors or broken vertex picking on Intel Haswell / WSL / Windows Cygwin |
 
 ## Environment shortcuts
 

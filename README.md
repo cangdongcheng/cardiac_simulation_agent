@@ -40,7 +40,7 @@ Concepts, findings, and bugs aren't separate categories — they're sections ins
 | | |
 | --- | --- |
 | openCARP, bench, meshtool | `/usr/local/bin/` |
-| meshalyzer | `/usr/local/meshalyzer/` (patched, see `tools/visualization/meshalyzer/haswell-fix.md`) |
+| meshalyzer | `/usr/local/meshalyzer/` (patched, see `tools/visualization/meshalyzer/vertex-picking-fixes.md`) |
 | carputils Python | `/home/cdc/miniconda3/envs/opencarp/bin/python` |
 | Tutorial install (run in place) | `/usr/local/lib/opencarp/share/tutorials/` (or `~/tutorials`) |
 | Tutorial-derived notes (curated) | `tools/ep_simulation/openCARP/tutorials/` |

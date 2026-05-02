@@ -167,7 +167,7 @@ Manual links, paper refs, related tools.
 
 ## File naming
 
-- Lowercase, hyphenated: `em-coupling.md`, `haswell-fix.md`
+- Lowercase, hyphenated: `em-coupling.md`, `vertex-picking-fixes.md`
 - One topic per file
 - Tool subfolders: `tools/ep_simulation/openCARP/monodomain.md`
 - Avoid abbreviations unless they're the canonical name (`openCARP` is fine; `ec` is not)
@@ -184,7 +184,7 @@ LaTeX `$$...$$` allowed in addition when a renderer is expected, but the Unicode
 
 ## Cross-linking
 
-- Use explicit relative paths: `[tools/visualization/meshalyzer/haswell-fix.md](../tools/visualization/meshalyzer/haswell-fix.md)`
+- Use explicit relative paths: `[tools/visualization/meshalyzer/vertex-picking-fixes.md](../tools/visualization/meshalyzer/vertex-picking-fixes.md)`
 - Don't say "see above" — name the file
 - Internal anchors (`[section](#section-name)`) are OK within long notes
 

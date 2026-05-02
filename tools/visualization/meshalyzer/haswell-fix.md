@@ -1,13 +1,13 @@
 ---
-title: Meshalyzer shader fix for Intel Haswell / older Mesa drivers
-status: validated   # patch applied locally on cdc-ThinkPad-X240, vertex picking confirmed working
+title: Meshalyzer vertex picking fixes for Intel Haswell / older Mesa / WSL
+status: validated   # Haswell binary patch + WSL source fix both confirmed working
 use_when: meshalyzer fails to compile shaders, prints `ERROR::SHADER::VERTEX::COMPILATION_FAILED`, or vertex picking does not select nodes — Intel Haswell or WSL
-last_updated: 2026-04-28
+last_updated: 2026-05-02
 ---
 
-# Meshalyzer shader fix for Intel Haswell / older Mesa drivers
+# Meshalyzer vertex picking fixes for Intel Haswell / older Mesa / WSL
 
-Documents the patch applied on `cdc-ThinkPad-X240` (Ubuntu 24.04, Intel HD Graphics 4400) so it can be replicated on the Windows WSL setup that has the same symptoms.
+Documents the patches applied on `cdc-ThinkPad-X240` (Ubuntu 24.04, Intel HD Graphics 4400) and on WSL2 (llvmpipe software renderer) to fix vertex picking.
 
 ## Symptoms
 
@@ -150,11 +150,78 @@ cd ~/tutorials/02_EP_tissue/00_simple
 - No `ERROR::SHADER::*` lines should appear in the terminal.
 - Clicking on the mesh should select individual vertices.
 
-## WSL-specific notes
+## WSL source-build fix (validated 2026-05-02)
 
-- WSL2 with WSLg uses an OpenGL stack that delegates to the Windows GPU via D3D12 (Mesa+Zink) or to Mesa software (llvmpipe). The `#version 410 core` failure has been reported on both paths, so the same patches apply.
+On WSL2 (Ubuntu 24.04, llvmpipe LLVM 20.1.2, Mesa 25.0.7, OpenGL 4.5), the Haswell binary patches alone do **not** fix picking. The GLSL version is not the issue (OpenGL 4.5 supports GLSL 4.50), and the shader compiles without errors. The root cause is different:
+
+### WSL root cause (Bug C)
+
+| # | Bug | Where |
+|---|---|---|
+| C | The picking pass renders vertex-ID-encoded colors to the **default framebuffer** (back buffer), then `glReadPixels(GL_BACK)` reads it back. On WSL2/WSLg with llvmpipe, `glReadPixels` from the default framebuffer returns stale data (the previously displayed frame, not the just-rendered pick pass). This is a WSLg/Wayland compositor issue — the default framebuffer is not reliably readable after rendering. | `src/select_util.cc::mesh_render()` renders to default FB; `src/Frame.cc::fill_buffer()` reads back from `GL_BACK` |
+
+Additionally, `draw_surfaces()` in `src/TBmeshWin.cc::draw()` is called unconditionally (not guarded by `renderMode&RENDER`), so it draws the mesh surface **over** the picking colors even if the readback worked.
+
+### Diagnosis evidence
+
+Debug output showed:
+- `col=(143,143,143,255)` before the `draw_surfaces` guard — reading the gray mesh surface, not pick colors
+- `col=(0,0,0,255)` after guarding `draw_surfaces` — reading a black frame with alpha=255 (the pick clear is `(0,0,0,0)` with alpha=0, confirming `glReadPixels` reads a different buffer)
+
+### Source changes applied
+
+All changes are in the source build at `~/meshalyzer/`.
+
+**1. GLSL version downgrade** (same intent as Haswell patches, harmless on 4.5 drivers):
+
+| File | Change |
+|---|---|
+| `src/render_func.h:4` | `#version 410 core` → `#version 400 core` |
+| `src/ColourBar.h` | 4× `#version 410 core` → `#version 400 core` |
+| `src/ScreenTxt.h` | 2× `#version 410 core` → `#version 400 core` |
+
+**2. Picking shader cleanup** (`src/select_util.h`):
+
+- Removed `#extension GL_EXT_clip_cull_distance : enable` (unsupported on Mesa Intel/llvmpipe)
+- Removed `float gl_ClipDistance[6];` declaration and `clipEqn` uniform + for-loop (trade-off: picking ignores clip planes)
+
+**3. Guard `draw_surfaces` during pick mode** (`src/TBmeshWin.cc:349`):
+
+```diff
+-  draw_surfaces( _rd_op, _trans_elems, false );
++  if ( !SELECT(renderMode) )
++    draw_surfaces( _rd_op, _trans_elems, false );
+```
+
+**4. FBO-based picking readback** (the actual WSL fix):
+
+`src/select_util.cc::mesh_render()` — instead of rendering to the default framebuffer and relying on `fill_buffer`'s `glReadPixels(GL_BACK)`, the picking pass now:
+
+1. Creates a temporary FBO with RGBA8 color + DEPTH24 renderbuffers sized to the viewport
+2. Binds the FBO and renders the pick points into it
+3. Calls `glReadPixels` on the FBO (guaranteed to return the just-rendered data)
+4. Stores the pixel data in `SelectVtx::_pickbuf`
+5. Deletes the FBO
+
+`src/select_util.h` — added `_pickbuf`, `_pick_w`, `_pick_h` members and a `pixel_color(x, y, color)` method to read from the stored buffer.
+
+`src/TBmeshWin.cc::process_hits()` — reads pixel colors from `_select.pixel_color()` instead of `frame.pixel_color()`.
+
+### Rebuild
+
+```bash
+cd ~/meshalyzer/_build && make -j$(nproc)
+```
+
+The binary at `~/meshalyzer/_build/src/meshalyzer` (symlinked from `/usr/local/meshalyzer/meshalyzer`) is updated in place.
+
+### Why the Haswell binary patch worked without the FBO fix
+
+On Haswell (Intel HD 4400, X11, hardware GL), `glReadPixels(GL_BACK)` from the default framebuffer works correctly. The only issues were the shader compilation errors (Bugs A + B). Once those were patched, picking worked because the readback path was reliable. On WSL/Wayland/llvmpipe, the readback path itself is broken (Bug C), requiring the FBO approach.
+
+## General WSL notes
+
 - AppImages need FUSE in WSL. If the AppImage refuses to mount, use `--appimage-extract` (step 2) and run `/usr/local/meshalyzer/extracted/AppRun` directly. The extracted approach is what we use here anyway, so this isn't extra work.
-- If on WSL you still see GLSL 4.10 errors after patching, double-check the count says `11 replacements`. If it says fewer, the build version differs and there are remaining `#version 410 core` strings — re-run the Python with that string repeated until count is 0.
 
 ## Reverting
 
